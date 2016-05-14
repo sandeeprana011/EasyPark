@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.techlo.easypark.ExitInvoice">
+
+    <TextView
+        android:id="@+id/lab_easyparking"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:gravity="center"
+        android:text="@string/app_name"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textStyle="bold" />
+
+    <TextView
+        android:gravity="center"
+        android:textStyle="bold"
+        android:layout_below="@+id/lab_easyparking"
+        android:id="@+id/lab_parkingsite_invoiceentry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="PARKING SITE"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:typeface="monospace"
+        android:layout_below="@+id/lab_parkingsite_invoiceentry"
+        android:id="@+id/t_parkingsite_invoiceentry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="01-SDMC LAJPAT NAGAR HALDIRAM"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/t_vehicleno_invoiceentry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/t_parkingsite_invoiceentry"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        android:text="VEHICLE NO .4897"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textStyle="bold"
+        android:typeface="monospace" />
+
+    <TextView
+        android:gravity="center"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_below="@+id/t_vehicleno_invoiceentry"
+        android:text="2 Wheeler"
+        android:id="@+id/t_vehicletype_invoiceentry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:id="@+id/lin_amountpayable"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/t_vehicletype_invoiceentry"
+        android:gravity="center"
+        android:visibility="visible">
+
+        <TextView
+            android:id="@+id/lab_amountpayable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/t_vehicleno"
+            android:text="RATE : "
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:typeface="monospace"
+            android:id="@+id/t_rate_invoiceentry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/t_vehicleno"
+            android:layout_toRightOf="@+id/lab_amountpayable"
+            android:text="₹ 20/hour"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/lin_enteredat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lin_amountpayable"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/lab_enterdat_invoiceentry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ENTERED AT : "
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:typeface="monospace"
+            android:id="@+id/t_enteredat_invoieentry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2016/12/26 12:30"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/b_printinvoice_entryinvocie"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lin_enteredat"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/button"
+        android:onClick="printinvoice"
+        android:text="Print Invoice" />
+
+    <TextView
+        android:layout_below="@+id/b_printinvoice_entryinvocie"
+        android:gravity="right"
+        android:textStyle="bold"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginTop="15dp"
+        android:textColor="@color/colorAccent"
+        android:text="2016/12/12 12:23:32"
+        android:id="@+id/timeClock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>

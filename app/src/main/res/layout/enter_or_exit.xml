@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".EnterOrExitActivity">
+
+    <TextView
+        android:layout_alignParentTop="true"
+        android:id="@+id/lab_parkingsite_home"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:gravity="center"
+        android:text="PARKING SITE"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/t_parkingsite_home"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lab_parkingsite_home"
+        android:layout_marginBottom="25dp"
+        android:gravity="center"
+        android:text="01-SDMC LAJPAT NAGAR HALDIRAM"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/t_fieldoperator_home"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/t_parkingsite_home"
+        android:layout_marginBottom="15dp"
+        android:gravity="center"
+        android:text="Field Operator-admin"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+    <RadioGroup
+        android:id="@+id/rad_groupwheelertype_home"
+        android:layout_below="@id/t_fieldoperator_home"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RadioButton
+            android:id="@+id/rb_2wheeler"
+            android:layout_weight="1"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="2 Wheeler"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:id="@+id/rb_4wheeler"
+            android:layout_weight="1"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="4 Wheeler"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </RadioGroup>
+
+    <EditText
+        android:layout_below="@+id/rad_groupwheelertype_home"
+        android:inputType="number"
+        android:id="@+id/e_vehiclenumber_home"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:drawableLeft="@drawable/ic_car"
+        android:drawablePadding="10dp"
+        android:hint="VEHICLE NUMBER" />
+
+
+
+
+    <LinearLayout
+        android:id="@+id/lin_buttonenterexitcancel_home"
+        android:layout_below="@+id/e_vehiclenumber_home"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:weightSum="10"
+        >
+        <Button
+            android:background="@drawable/button"
+            android:onClick="enterVehicle"
+            android:layout_weight="4"
+            android:id="@+id/b_vehicleenter_home"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="3dp"
+            android:text="Enter" />
+
+        <Button
+            android:layout_marginRight="3dp"
+            android:background="@drawable/button"
+            android:onClick="cancelAction"
+            android:layout_weight="4"
+            android:id="@+id/b_vehiclecancel_home"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/b_vehicleenter_home"
+            android:text="CANCEL" />
+    </LinearLayout>
+    <TextView
+        android:layout_below="@+id/lin_buttonenterexitcancel_home"
+        android:gravity="right"
+        android:textStyle="bold"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginTop="15dp"
+        android:textColor="@color/colorAccent"
+        android:text="2016/12/12 12:23:32"
+        android:id="@+id/timeClock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</RelativeLayout>
