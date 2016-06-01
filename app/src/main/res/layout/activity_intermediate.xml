@@ -67,6 +67,7 @@
             android:text="PARK-OUT" />
 
         <Button
+            android:onClick="reportActivityOpen"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="5dp"

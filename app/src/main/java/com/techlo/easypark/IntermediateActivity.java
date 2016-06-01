@@ -105,4 +105,10 @@ public class IntermediateActivity extends AppCompatActivity {
         super.onDestroy();
         showClock.cancel(true);
     }
+
+    public void reportActivityOpen(View view) {
+        Intent intent=new Intent(this,ReportActivity.class);
+        startActivity(intent);
+    }
+
 }

@@ -2,21 +2,15 @@ package com.techlo.easypark;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothServerSocket;
-import android.bluetooth.BluetoothSocket;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,7 +25,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
-import java.util.UUID;
 
 public class InvoiceEntryVehicle extends AppCompatActivity {
 
@@ -39,7 +32,7 @@ public class InvoiceEntryVehicle extends AppCompatActivity {
     String parkingSite;
     String number;
     String timestamp;
-    TextView tParkingsite, tVehicleNo, tRate, tTimeStamp;
+    TextView tParkingsite, tVehicleNo, tRate, tTimeStamp, tVehicleType;
     private SharedPreferences preferences;
     private int vehicleType;
     private TextView tTimeClock;
@@ -47,16 +40,21 @@ public class InvoiceEntryVehicle extends AppCompatActivity {
     private BluetoothAdapter mBluetoothAdapter;
     private AEMScrybeDevice device;
 
+    String username, password;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invoice_entry_vehicle);
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+        username = preferences.getString(Fields.USERNAME, "");
+
         tParkingsite = (TextView) findViewById(R.id.t_parkingsite_invoiceentry);
         tVehicleNo = (TextView) findViewById(R.id.t_vehicleno_invoiceentry);
         tRate = (TextView) findViewById(R.id.t_rate_invoiceentry);
         tTimeStamp = (TextView) findViewById(R.id.t_enteredat_invoieentry);
+        tVehicleType = (TextView) findViewById(R.id.t_vehicletype_invoiceentry);
 
         tTimeClock = (TextView) findViewById(R.id.timeClock);
 
@@ -69,14 +67,17 @@ public class InvoiceEntryVehicle extends AppCompatActivity {
 
         number = intent.getStringExtra(Fields.VEHICLE_NO);
         timestamp = intent.getStringExtra(Fields.TIMESTAMP);
-        parkingSite = preferences.getString(Fields.HEADER, parkingSite);
+//        parkingSite = preferences.getString(Fields.HEADER, parkingSite);
+        parkingSite = "01-SDMC LAJPAT NAGAR,HALDIRAM";
         vehicleType = intent.getIntExtra(Fields.VEHICLE_TYPE, 0);
 
         tParkingsite.setText(parkingSite);
         tVehicleNo.setText("VEH. NO. : " + number);
         if (vehicleType == IntermediateActivity.TWO_WHEELERS) {
+            tVehicleType.setText("2 Wheeler");
             tRate.setText("₹ 10/hour");
         } else {
+            tVehicleType.setText("4 Wheeler");
             tRate.setText("₹ 20/hour");
         }
         tTimeStamp.setText(timestamp);
@@ -102,17 +103,24 @@ public class InvoiceEntryVehicle extends AppCompatActivity {
 //            dialogShow(devices);
 
 
+            String vehTypeName;
+            if (vehicleType == IntermediateActivity.TWO_WHEELERS) {
+                vehTypeName = "2 WHEELER";
+            } else {
+                vehTypeName = "4 WHEELER";
+            }
+
+
             dialogAemSearchAndPrint(
                     "Parking Site",
                     parkingSite,
-                    "T&C",
-                    "",
-                    "admin",
-                    timestamp,
-                    tRate.getText().toString(),
-                    String.valueOf("Amount : "+(vehicleType+1)*10),
-                    ""
-                    );
+                    ".",
+                    ".",
+                    username + ".",
+                    timestamp + ".",
+                    tRate.getText().toString() + ".",
+                    vehTypeName + "."
+            );
         } else {
             Log.wtf("log", "no device found");
         }
@@ -134,6 +142,92 @@ public class InvoiceEntryVehicle extends AppCompatActivity {
                 sendDataToDevice();
             }
         }
+    }
+
+    public void dialogAemSearchAndPrint(final String header1,
+                                        final String header2,
+                                        final String footer1,
+                                        final String footer2,
+                                        final String operator,
+                                        final String enteredAt,
+                                        final String rate,
+                                        final String vehTypeStringText
+    ) {
+        device = new AEMScrybeDevice(new IAemScrybe() {
+            @Override
+            public void onDiscoveryComplete(final ArrayList<String> arrayList) {
+                Log.e("Printers", "list");
+//                final AlertDialog.Builder builderSingle = new AlertDialog.Builder(ExitInvoice.this);
+//        builderSingle.setIcon(R.drawable.ic_launcher);
+//                builderSingle.setTitle("Select Printer:-");
+
+//                final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+//                        ExitInvoice.this,
+//                        android.R.layout.select_dialog_singlechoice);
+
+                String printerName = "";
+
+                for (String name : arrayList) {
+//                    arrayAdapter.add(name);
+                    if (name.contains("inter")) {
+                        printerName = name;
+                    }
+                }
+//                builderSingle.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        dialog.dismiss();
+//                    }
+//                });
+//                builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        String printerName = arrayList.get(which);
+//                        String string = device.pairPrinter(printerName);
+                Log.e("printer", printerName);
+                try {
+                    device.connectToPrinter(printerName);
+                    final AEMPrinter printer = device.getAemPrinter();
+
+
+                    onPrintBill(
+                            printer,
+                            device,
+                            printerName,
+                            vehTypeStringText + ".",
+                            number + ".",
+                            enteredAt + ".",
+                            rate + ".",
+                            header1 + ".",
+                            header2 + ".",
+                            operator + "."
+                    );
+
+                    boolean a = device.disConnectPrinter();
+
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.e("error", "io bluetooth printing");
+                    Toast.makeText(getApplicationContext(), "Error While printing bluetoth printing", Toast.LENGTH_LONG).show();
+                }
+
+
+            }
+        });
+//                builderSingle.show();
+//
+//
+//            }
+//        });
+
+        try {
+            device.startDiscover(this);
+        } catch (Exception ex) {
+            Log.e("Exception", "Exception");
+        }
+
+
     }
 
 
@@ -166,158 +260,112 @@ public class InvoiceEntryVehicle extends AppCompatActivity {
 
     }
 
-    public void dialogAemSearchAndPrint(final String header1,
-                                        final String header2,
-                                        final String footer1,
-                                        final String footer2,
-                                        final String operator,
-                                        final String enteredAt,
-                                        final String exitAt,
-                                        final String totalAmount,
-                                        final String totalTimeSpend
-    ) {
-        device = new AEMScrybeDevice(new IAemScrybe() {
-            @Override
-            public void onDiscoveryComplete(final ArrayList<String> arrayList) {
-                Log.e("Printers", "list");
-                final AlertDialog.Builder builderSingle = new AlertDialog.Builder(InvoiceEntryVehicle.this);
-//        builderSingle.setIcon(R.drawable.ic_launcher);
-                builderSingle.setTitle("Select Printer:-");
 
-                final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                        InvoiceEntryVehicle.this,
-                        android.R.layout.select_dialog_singlechoice);
-
-                for (String name : arrayList) {
-                    arrayAdapter.add(name);
-                }
-                builderSingle.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String printerName = arrayList.get(which);
-                        String string=device.pairPrinter(printerName);
-                        Log.e("printer",string);
-                        try {
-                            device.connectToPrinter(string);
-                            AEMPrinter printer=device.getAemPrinter();
-
-                            printer.setFontType((byte) 8);
-                            printer.print(header1);
-                            printer.setFontType((byte) 3);
-                            printer.print(header2);
-                            printer.setFontType((byte) 6);
-                            printer.print(totalAmount);
-                            printer.print(operator);
-                            printer.print(enteredAt);
-                            printer.print(exitAt);
-                            printer.print(totalTimeSpend);
-                            printer.print(footer1);
-                            printer.print(footer2);
-
-                            device.disConnectPrinter();
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-
-                    }
-                });
-
-
-            }
-        });
-
-        device.startDiscover(this);
-
-
-    }
-
-    public void pairDeviceWith() {
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter != null) {
-            if (!mBluetoothAdapter.isEnabled()) {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+    public void onPrintBill(
+            AEMPrinter m_AemPrinter,
+            AEMScrybeDevice m_AemScrybeDevice,
+            String printerName,
+            String veh_cat,
+            String veh_numbr,
+            String date_time_2,
+            String rate,
+            String textHeader1,
+            String textHeader2,
+            String fieldOperator) {
+        try {
+            m_AemScrybeDevice.connectToPrinter(printerName);
+            m_AemPrinter = m_AemScrybeDevice.getAemPrinter();
+            showAlert("Connected with " + printerName);
+        } catch (IOException e) {
+            if (e.getMessage().contains("Service discovery failed")) {
+                showAlert("Not Connected\n"
+                        + printerName
+                        + " is unreachable or off otherwise it is connected with other device");
+            } else if (e.getMessage().contains("Device or resource busy")) {
+                showAlert("the device is already connected");
             } else {
-                Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-                if (pairedDevices.size() > 0) {
-                    // Loop through paired devices
-                    final AlertDialog.Builder builderSingle = new AlertDialog.Builder(InvoiceEntryVehicle.this);
-//        builderSingle.setIcon(R.drawable.ic_launcher);
-                    builderSingle.setTitle("Select Printer:-");
-
-                    final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                            InvoiceEntryVehicle.this,
-                            android.R.layout.select_dialog_singlechoice);
-
-                    for (BluetoothDevice device : pairedDevices) {
-                        // Add the name and address to an array adapter to show in a ListView
-                        arrayAdapter.add(device.getName() + "\n" + device.getAddress());
-
-                    }
-                }
+                showAlert("Unable to connect");
             }
-        } else {
-            // Device does not support Bluetooth
+        }
+        if (m_AemPrinter == null) {
+            showAlert("Printer not connected");
+            return;
+        }
 
+        try {
+            m_AemPrinter.setFontType(AEMPrinter.DOUBLE_HEIGHT);
+            m_AemPrinter.setFontType(AEMPrinter.TEXT_ALIGNMENT_CENTER);
+            m_AemPrinter.setFontType(AEMPrinter.DOUBLE_HEIGHT);
+            m_AemPrinter.setFontType(AEMPrinter.TEXT_ALIGNMENT_CENTER);
+            String data = "PARKING - IN SLIP";
+            m_AemPrinter.print(data);
+            String d = "________________________________";
+            m_AemPrinter.print(d);
+            m_AemPrinter.setFontType(AEMPrinter.TEXT_ALIGNMENT_CENTER);
+            data = textHeader1 + ".";
+            m_AemPrinter.print(data);
+            data = textHeader2 + ".";
+            m_AemPrinter.print(data);
+            data = "FSO-01 - " + fieldOperator;
+            m_AemPrinter.print(data);
+            d = "________________________________";
+            m_AemPrinter.print(d);
+            data = "VEHICLE TYPE: " + veh_cat;
+            m_AemPrinter.print(data);
+            data = "Rate : " + rate;
+            m_AemPrinter.print(data);
+            data = "Veh. No :" + veh_numbr;
+            m_AemPrinter.setFontType(AEMPrinter.DOUBLE_HEIGHT);
+            m_AemPrinter.setFontType(AEMPrinter.TEXT_ALIGNMENT_CENTER);
+            m_AemPrinter.print(data);
+            data = "Time IN: " + date_time_2;
+            m_AemPrinter.print(data);
+            m_AemPrinter.print(d);
+            data = "** Parking at owners risk no responsibility for valuable items like Laptop, Wallet, Helmet etc." +
+                    "If token is lost Rs 50 will be charged after verification\nPowered by: V PARK";
+
+            m_AemPrinter.print(data);
+            m_AemPrinter.setFontType(AEMPrinter.DOUBLE_HEIGHT);
+            m_AemPrinter.setFontType(AEMPrinter.TEXT_ALIGNMENT_CENTER);
+            m_AemPrinter.setCarriageReturn();
+
+        }
+        // catch (IOException e)
+        catch (Exception e) {
+            if (e.getMessage().contains("socket closed"))
+                showAlert("Printer not connected");
         }
     }
 
-    private class AcceptThread extends Thread {
-        private static final String NAME = "v_park";
-        private final BluetoothServerSocket mmServerSocket;
-
-        public AcceptThread() {
-            // Use a temporary object that is later assigned to mmServerSocket,
-            // because mmServerSocket is final
-            BluetoothServerSocket tmp = null;
-            try {
-                // MY_UUID is the app's UUID string, also used by the client code
-                TelephonyManager tManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                String uuid = tManager.getDeviceId();
-                UUID uuid1 = UUID.fromString(uuid);
-                tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME, uuid1);
+    private void showAlert(String s) {
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+    }
 
 
-            } catch (IOException e) {
+    void findBT() {
+        try {
+            mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (mBluetoothAdapter == null) {
+                Toast toast = Toast.makeText(getApplicationContext(), "No bluetooth adapter available.", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP | Gravity.START, 0, 0);
+                toast.show();
             }
-            mmServerSocket = tmp;
-        }
+            if (!mBluetoothAdapter.isEnabled()) {
+                Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBluetooth, 0);
+            }
+            Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+            if (pairedDevices.size() > 0) {
+                for (BluetoothDevice device : pairedDevices) {
 
-        public void run() {
-            BluetoothSocket socket = null;
-            // Keep listening until exception occurs or a socket is returned
-            while (true) {
-                try {
-                    socket = mmServerSocket.accept();
-                } catch (IOException e) {
-                    break;
-                }
-                // If a connection was accepted
-                if (socket != null) {
-                    // Do work to manage the connection (in a separate thread)
-//                    manageConnectedSocket(socket);
-//                    mmServerSocket.close();
-                    break;
+                    if (device.getName().equals("BTprinter4454")) {
+
+                        break;
+                    }
                 }
             }
-        }
-
-        /**
-         * Will cancel the listening socket, and cause the thread to finish
-         */
-        public void cancel() {
-            try {
-                mmServerSocket.close();
-            } catch (IOException e) {
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

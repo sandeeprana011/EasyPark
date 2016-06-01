@@ -5,7 +5,7 @@ package com.techlo.easypark;
  */
 public class Fields {
 
-    public static final String URL_BASE_URL="http://xxxunique.com/parkme/";
+    public static final String URL_BASE_URL="http://xxxunique.com/parkme_new/";
     public static final String URL_LOGIN = URL_BASE_URL+"login.php?";
     public static final String USERNAME = "username";
     public static final String STATUS = "status";
@@ -29,4 +29,12 @@ public class Fields {
     public static final String VEHICLE_TYPE = "vehicletype";
     public static final String TANDC="Parking at owners risk. No responsibility for valuable items like laptop,wallet,helmet etc." +
             "If token is lost Rs 50 will be charged after verification\nPowered By: V Park";
+    public static final String PASSWORD = "password";
+    public static final String URL_REPORT=URL_BASE_URL+"report.php?";
+    public static final String SETTINGS = "settings";
+    public static final String VEH_TWO = "veh_two";
+    public static final String VEH_TWO_EXIT = "veh_two_exit";
+    public static final String VEH_FOUR = "veh_four";
+    public static final String VEH_FOUR_EXIT = "veh_four_exit";
+    public static final String TOTAL_AMOUNT = "total_amount";
 }

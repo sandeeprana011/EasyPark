@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputFilter;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -33,12 +34,14 @@ public class EnterOrExitActivity extends AppCompatActivity {
     private RadioGroup radioGroup;
     private TextView tTimeClock;
     private ClockShow showClock;
+    String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.enter_or_exit);
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+//        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferences = getSharedPreferences(Fields.SETTINGS,MODE_PRIVATE);
         Button button = (Button) findViewById(R.id.b_vehicleenter_home);
 
 
@@ -47,6 +50,10 @@ public class EnterOrExitActivity extends AppCompatActivity {
         showClock = new ClockShow();
         showClock.execute();
 
+
+        username=preferences.getString(Fields.USERNAME,"admin");
+
+        Log.e("username",username+" ");
 
         Intent intent = getIntent();
         VEHICLE_MOVEMENT = intent.getIntExtra(Fields.MOVEMENT, 0);
@@ -86,19 +93,26 @@ public class EnterOrExitActivity extends AppCompatActivity {
         }
 
         EditText eVehicleNumber = (EditText) findViewById(R.id.e_vehiclenumber_home);
+        eVehicleNumber.setFilters(new InputFilter[] {new InputFilter.AllCaps()});
         String vehicleNumber = null;
         if (eVehicleNumber != null) {
             vehicleNumber = eVehicleNumber.getText().toString();
+            try {
+
+                vehicleNumber=vehicleNumber.toUpperCase();
+            }catch (Exception ex){
+                Log.e("veh","allcaps");
+            }
         } else {
             Log.e("null", "vehicle number");
         }
 
+        Date date = Calendar.getInstance().getTime();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+        String timeStamp = sdf.format(date);
 
         if (VEHICLE_MOVEMENT == IntermediateActivity.MOV_ENTERY) {
             EnterVehicle vehicle = new EnterVehicle();
-            Date date = Calendar.getInstance().getTime();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
-            String timeStamp = sdf.format(date);
             Log.e("timestamp", timeStamp);
 //            try {
 
@@ -110,9 +124,10 @@ public class EnterOrExitActivity extends AppCompatActivity {
             Log.e("movement", "entry");
         } else {
             ExitVehicle exitVehicle = new ExitVehicle();
-            Date date = Calendar.getInstance().getTime();
+//            Date date = Calendar.getInstance().getTime();
 //            exitVehicle.execute(vehicleNumber, String.valueOf(date.getTime()), String.valueOf(VEHICLE_TYPE));
-            exitVehicle.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, vehicleNumber, "", String.valueOf(VEHICLE_TYPE));
+            timeStamp=timeStamp.replace(" ","%20");
+            exitVehicle.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, vehicleNumber, "", String.valueOf(VEHICLE_TYPE),timeStamp);
             Log.e("movement", "exit");
         }
 
@@ -121,6 +136,7 @@ public class EnterOrExitActivity extends AppCompatActivity {
     public void cancelAction(View view) {
         finish();
     }
+
 
 
     class EnterVehicle extends AsyncTask<String, String, Boolean> {
@@ -141,7 +157,14 @@ public class EnterOrExitActivity extends AppCompatActivity {
             number = params[0];
             timestamp = params[1];
             try {
-                String url = Fields.URL_ENTERVEHICLE + "number=" + params[0] + "&type=0" + "&timestamp=" + params[1];
+//                ?username=admin&number=4444&timestamp=2016-05-20%2000:00:00&type=0&timestamp_exit=2016-05-20 11:11:11&vehicle_type=1
+                String url = Fields.URL_ENTERVEHICLE +
+                        "number=" + params[0] +
+                        "&type=0" +
+                        "&timestamp=" + params[1]+
+                        "&vehicle_type="+params[2]+
+                        "&username="+username;
+//                        "&timestamp_exit="+params[2];
                 if (url.contains(" ")) {
                     url = url.replace(" ", "%20");
                 }
@@ -184,10 +207,10 @@ public class EnterOrExitActivity extends AppCompatActivity {
 
         private Downloader downloader;
 
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
         }
 
         @Override
@@ -195,7 +218,15 @@ public class EnterOrExitActivity extends AppCompatActivity {
             downloader = new Downloader();
             String strEnterVehicle = null;
             try {
-                strEnterVehicle = downloader.downloadContent(Fields.URL_ENTERVEHICLE + "number=" + params[0] + "&timestamp=" + params[1] + "&type=1");
+                strEnterVehicle = downloader.downloadContent(Fields.URL_ENTERVEHICLE +
+                        "number=" + params[0] +
+                        "&timestamp=" + params[1] +
+                        "&type=1" +
+                        "&"+"vehicle_type="+params[2]+
+                        "&username="+username+
+                        "&timestamp_exit="+params[3]
+
+                );
                 Log.e("strExit", strEnterVehicle);
 
                 return strEnterVehicle;
@@ -213,7 +244,7 @@ public class EnterOrExitActivity extends AppCompatActivity {
             super.onPostExecute(s);
             if (s != null) {
 
-
+                Log.e("response",s);
                 try {
                     JSONObject jsonObject = new JSONObject(s);
                     if (downloader.isOkJ(jsonObject, Fields.NUMBER)) {
@@ -230,14 +261,9 @@ public class EnterOrExitActivity extends AppCompatActivity {
                         String vehicleNO = jsonObject.getString(Fields.NUMBER);
 
                         Calendar calendar = Calendar.getInstance();
+
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
-
-
                         Date exitDate = Calendar.getInstance().getTime();
-//                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
-//                        String timeStamp = sdf.format(date);
-
-//                        Date exitDate = sdf.f(date);
                         Date enterDate = sdf.parse(enterTime);
 
 
@@ -266,6 +292,7 @@ public class EnterOrExitActivity extends AppCompatActivity {
                         intent.putExtra(Fields.TOTAL_TIME, totalTime);
                         intent.putExtra(Fields.ENTERED_AT, enterTime);
                         intent.putExtra(Fields.EXIT_AT, sdf.format(exitDate));
+                        intent.putExtra(Fields.VEHICLE_TYPE,VEHICLE_TYPE);
 
                         startActivity(intent);
 

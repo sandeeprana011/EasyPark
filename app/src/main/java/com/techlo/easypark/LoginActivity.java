@@ -1,9 +1,11 @@
 package com.techlo.easypark;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.multidex.MultiDex;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,10 +32,17 @@ public class LoginActivity extends AppCompatActivity {
 //    Thread threadTime;
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(newBase);
+        MultiDex.install(this);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        preferences= PreferenceManager.getDefaultSharedPreferences(this);
+//        preferences= PreferenceManager.getDefaultSharedPreferences(this);
+        preferences= getSharedPreferences(Fields.SETTINGS,MODE_PRIVATE);
         editor=preferences.edit();
         tUsername= (EditText) findViewById(R.id.t_username_login);
         tPassword= (EditText) findViewById(R.id.t_password_login);
@@ -70,6 +79,10 @@ public class LoginActivity extends AppCompatActivity {
         view.setEnabled(false);
         String strUsername=tUsername.getText().toString();
         String strPassword=tPassword.getText().toString();
+
+        preferences.edit().putString(Fields.USERNAME,strUsername).apply();
+        preferences.edit().putString(Fields.PASSWORD,strPassword).apply();
+
         LoginUser loginUser=new LoginUser();
         loginUser.execute(strUsername,strPassword);
 
@@ -113,6 +126,7 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(User user) {
             if(user!=null){
+
                 editor.putString(Fields.NAME,user.getName());
                 editor.putString(Fields.EMAIL,user.getEmail());
                 editor.putString(Fields.PHOTO,user.getPhone());

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">V Park</string>
+    <string name="footer" />
 </resources>
